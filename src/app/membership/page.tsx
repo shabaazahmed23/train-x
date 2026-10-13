@@ -5,25 +5,29 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
+import { DEFAULT_PLANS, DEFAULT_SETTINGS, withTimeout } from '@/lib/data-defaults';
 import { Check, Star, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MembershipPage() {
   const session = await getSession();
-  let plans: Awaited<ReturnType<typeof prisma.membershipPlan.findMany>> = [];
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  let plans: any[] = DEFAULT_PLANS;
+  let settings: any = DEFAULT_SETTINGS;
 
   try {
-    const results = await Promise.all([
+    const dbPromise = Promise.all([
       prisma.membershipPlan.findMany({
         where: { isPublished: true, isArchived: false },
         orderBy: { price: 'asc' },
       }),
       prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
     ]);
-    plans = results[0];
-    settings = results[1];
+    const results = await withTimeout(dbPromise, 2500, null);
+    if (results) {
+      if (results[0] && results[0].length > 0) plans = results[0];
+      if (results[1]) settings = results[1];
+    }
   } catch (error) {
     console.error('Database query error in MembershipPage:', error);
   }
@@ -123,14 +127,15 @@ export default async function MembershipPage() {
                       </div>
 
                       <Link
-                        href={`/register?plan=${plan.slug}`}
+                        href={session ? `/member/renew?plan=${plan.slug}` : `/register?plan=${plan.slug}`}
+                        prefetch={true}
                         className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
                           plan.isPopular
                             ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
                             : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
                         }`}
                       >
-                        Join {plan.name}
+                        {session ? `Renew with ${plan.name}` : `Join ${plan.name}`}
                       </Link>
                     </div>
                   );

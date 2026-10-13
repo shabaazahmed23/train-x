@@ -4,25 +4,29 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { DEFAULT_OFFERS, DEFAULT_SETTINGS, withTimeout } from '@/lib/data-defaults';
 import { Tag, Sparkles, Clock, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function OffersPage() {
   const session = await getSession();
-  let offers: Awaited<ReturnType<typeof prisma.offer.findMany>> = [];
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  let offers: any[] = DEFAULT_OFFERS;
+  let settings: any = DEFAULT_SETTINGS;
 
   try {
-    const results = await Promise.all([
+    const dbPromise = Promise.all([
       prisma.offer.findMany({
         where: { isActive: true, isPublic: true },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
     ]);
-    offers = results[0];
-    settings = results[1];
+    const results = await withTimeout(dbPromise, 2500, null);
+    if (results) {
+      if (results[0] && results[0].length > 0) offers = results[0];
+      if (results[1]) settings = results[1];
+    }
   } catch (error) {
     console.error('Database query error in OffersPage:', error);
   }
@@ -112,7 +116,8 @@ export default async function OffersPage() {
 
                     <div className="pt-6 mt-6 border-t border-[#242424]">
                       <Link
-                        href={`/register?coupon=${offer.code}`}
+                        href={session ? `/member/renew?coupon=${offer.code}` : `/register?coupon=${offer.code}`}
+                        prefetch={true}
                         className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black font-bold text-xs uppercase tracking-wider py-2.5 px-4 transition-colors"
                       >
                         Use Coupon Now <ArrowRight className="h-3.5 w-3.5" />

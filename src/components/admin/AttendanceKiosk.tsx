@@ -62,40 +62,7 @@ export function AttendanceKiosk() {
           </div>
         </div>
 
-        {/* Quick Demo Simulator Buttons */}
-        <div className="pt-2 border-t border-[#222]">
-          <span className="text-[10px] font-mono uppercase text-[#7E7E78] block mb-2">
-            One-Click Scan Test:
-          </span>
-          <div className="space-y-1.5">
-            <button
-              type="button"
-              onClick={() => handleScan('FL-2026-0001')}
-              className="w-full flex items-center justify-between p-2 rounded bg-[#1A1A1A] hover:border-[#C8A96B] border border-[#262626] text-[11px] text-left transition-colors"
-            >
-              <span className="text-[#F5F5F0]">Rahul Verma (Active Gold)</span>
-              <span className="font-mono text-[#C8A96B]">FL-2026-0001</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => handleScan('FL-2026-0002')}
-              className="w-full flex items-center justify-between p-2 rounded bg-[#1A1A1A] hover:border-amber-500 border border-[#262626] text-[11px] text-left transition-colors"
-            >
-              <span className="text-amber-400">Sneha Patel (Expiring in 4d)</span>
-              <span className="font-mono text-amber-400">FL-2026-0002</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleScan('FL-2026-0003')}
-              className="w-full flex items-center justify-between p-2 rounded bg-[#1A1A1A] hover:border-rose-500 border border-[#262626] text-[11px] text-left transition-colors"
-            >
-              <span className="text-rose-400">Arjun Mehta (Expired Plan)</span>
-              <span className="font-mono text-rose-400">FL-2026-0003</span>
-            </button>
-          </div>
-        </div>
 
         {/* Verification Outcome Box */}
         {result && (

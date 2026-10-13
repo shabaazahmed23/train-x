@@ -32,16 +32,26 @@ export default function LoginPage() {
     });
   };
 
-  const fillCredentials = (userEmail: string, userPass: string) => {
-    setEmail(userEmail);
-    setPassword(userPass);
+  const handleQuickAdminLogin = () => {
     setError(null);
+    const formData = new FormData();
+    formData.append('email', 'admin@fitlife.com');
+    formData.append('password', 'Admin@Fitlife2026!');
+    startTransition(async () => {
+      const result = await loginAction(formData);
+      if (result.success && result.redirectTo) {
+        router.push(result.redirectTo);
+        router.refresh();
+      } else {
+        setError(result.error || 'Administrator authentication failed.');
+      }
+    });
   };
 
   return (
     <div className="min-h-screen bg-[#0E0E0E] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 group mb-4">
+        <Link href="/" prefetch={true} className="inline-flex items-center gap-2 group mb-4">
           <div className="h-10 w-10 rounded bg-[#1A1A1A] border border-[#C8A96B]/50 flex items-center justify-center font-bold text-[#C8A96B] text-xl">
             F
           </div>
@@ -110,54 +120,23 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111] font-bold text-xs uppercase tracking-wider py-3 px-4 transition-all disabled:opacity-50 mt-2"
+              className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] active:scale-[0.99] text-[#111] font-bold text-xs uppercase tracking-wider py-3 px-4 transition-all disabled:opacity-50 mt-2 cursor-pointer"
             >
               {isPending ? 'Authenticating...' : 'Sign In'} <ArrowRight className="h-4 w-4" />
             </button>
           </form>
 
-          {/* Quick Demo Login Credentials Bar for testing convenience */}
+          {/* Quick 1-Click Admin Direct Sign In */}
           <div className="mt-6 pt-5 border-t border-[#222222]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E7E78] block mb-2">
-              Instant Demo Fill:
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <button
-                type="button"
-                onClick={() => fillCredentials('admin@fitlife.com', 'Admin@Fitlife2026!')}
-                className="flex items-center gap-1.5 p-2 rounded border border-[#2D2D2D] bg-[#181818] hover:border-[#C8A96B] text-[#A0A09B] hover:text-[#F5F5F0] transition-colors text-left"
-              >
-                <Shield className="h-3 w-3 text-[#C8A96B] shrink-0" />
-                <span className="truncate">Admin Portal</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials('sneha.patel@example.com', 'Member@123')}
-                className="flex items-center gap-1.5 p-2 rounded border border-[#2D2D2D] bg-[#181818] hover:border-[#C8A96B] text-[#A0A09B] hover:text-[#F5F5F0] transition-colors text-left"
-              >
-                <User className="h-3 w-3 text-amber-400 shrink-0" />
-                <span className="truncate">Expiring Member</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials('rahul.verma@example.com', 'Member@123')}
-                className="flex items-center gap-1.5 p-2 rounded border border-[#2D2D2D] bg-[#181818] hover:border-[#C8A96B] text-[#A0A09B] hover:text-[#F5F5F0] transition-colors text-left"
-              >
-                <User className="h-3 w-3 text-emerald-400 shrink-0" />
-                <span className="truncate">Active Member</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials('arjun.mehta@example.com', 'Member@123')}
-                className="flex items-center gap-1.5 p-2 rounded border border-[#2D2D2D] bg-[#181818] hover:border-[#C8A96B] text-[#A0A09B] hover:text-[#F5F5F0] transition-colors text-left"
-              >
-                <User className="h-3 w-3 text-rose-400 shrink-0" />
-                <span className="truncate">Expired Member</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleQuickAdminLogin}
+              disabled={isPending}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded border border-[#2D2D2D] hover:border-[#C8A96B] bg-[#181818] text-[#C8A96B] hover:text-[#DFCA98] text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <Shield className="h-3.5 w-3.5 shrink-0" />
+              <span>{isPending ? 'Authenticating...' : '1-Click Administrator Access'}</span>
+            </button>
           </div>
 
           <div className="mt-5 text-center text-xs text-[#80807B]">

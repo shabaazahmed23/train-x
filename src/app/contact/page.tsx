@@ -3,15 +3,18 @@ import { Footer } from '@/components/public/Footer';
 import { ContactForm } from '@/components/public/ContactForm';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { DEFAULT_SETTINGS, withTimeout } from '@/lib/data-defaults';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ContactPage() {
   const session = await getSession();
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  let settings: any = DEFAULT_SETTINGS;
   try {
-    settings = await prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+    const dbPromise = prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+    const result = await withTimeout(dbPromise, 2500, null);
+    if (result) settings = result;
   } catch (error) {
     console.error('Database query error in ContactPage:', error);
   }

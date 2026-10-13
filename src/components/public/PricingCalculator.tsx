@@ -325,7 +325,8 @@ export function PricingCalculator({ plans }: PricingCalculatorProps) {
 
           <Link
             href={`/register?plan=${selectedPlan?.slug || ''}${couponApplied ? `&coupon=${couponApplied.code}` : ''}`}
-            className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111111] font-bold text-xs uppercase tracking-wider py-3.5 px-4 transition-all"
+            prefetch={true}
+            className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] active:scale-[0.99] text-[#111111] font-bold text-xs uppercase tracking-wider py-3.5 px-4 transition-all cursor-pointer shadow-md shadow-[#C8A96B]/15"
           >
             Enroll With This Selection <ArrowRight className="h-4 w-4" />
           </Link>

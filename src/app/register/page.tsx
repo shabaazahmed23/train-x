@@ -62,7 +62,7 @@ function RegisterFormContent() {
   return (
     <div className="min-h-screen bg-[#0E0E0E] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 group mb-4">
+        <Link href="/" prefetch={true} className="inline-flex items-center gap-2 group mb-4">
           <div className="h-10 w-10 rounded bg-[#1A1A1A] border border-[#C8A96B]/50 flex items-center justify-center font-bold text-[#C8A96B] text-xl">
             F
           </div>
@@ -182,7 +182,7 @@ function RegisterFormContent() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111] font-bold text-xs uppercase tracking-wider py-3 px-4 transition-all disabled:opacity-50 mt-4"
+              className="w-full flex items-center justify-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] active:scale-[0.99] text-[#111] font-bold text-xs uppercase tracking-wider py-3 px-4 transition-all disabled:opacity-50 mt-4 cursor-pointer"
             >
               {isPending ? 'Enrolling Account...' : 'Complete Registration'}{' '}
               <ArrowRight className="h-4 w-4" />
@@ -191,7 +191,7 @@ function RegisterFormContent() {
 
           <div className="mt-5 text-center text-xs text-[#80807B]">
             Already a FITLIFE member?{' '}
-            <Link href="/login" className="text-[#C8A96B] font-semibold hover:underline">
+            <Link href="/login" prefetch={true} className="text-[#C8A96B] font-semibold hover:underline">
               Log in here
             </Link>
           </div>

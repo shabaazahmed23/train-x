@@ -7,6 +7,13 @@ import { PricingCalculator } from '@/components/public/PricingCalculator';
 import { ContactForm } from '@/components/public/ContactForm';
 import { formatCurrency } from '@/lib/utils';
 import {
+  DEFAULT_PLANS,
+  DEFAULT_TRAINERS,
+  DEFAULT_OFFERS,
+  DEFAULT_SETTINGS,
+  withTimeout,
+} from '@/lib/data-defaults';
+import {
   ArrowRight,
   Check,
   Shield,
@@ -26,14 +33,14 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const session = await getSession();
 
-  // Load live data from the database safely with fallbacks
-  let plans: Awaited<ReturnType<typeof prisma.membershipPlan.findMany>> = [];
-  let trainers: Awaited<ReturnType<typeof prisma.trainer.findMany>> = [];
-  let offers: Awaited<ReturnType<typeof prisma.offer.findMany>> = [];
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  // Load live data from the database safely with fast timeout fallbacks
+  let plans: any[] = DEFAULT_PLANS;
+  let trainers: any[] = DEFAULT_TRAINERS;
+  let offers: any[] = DEFAULT_OFFERS;
+  let settings: any = DEFAULT_SETTINGS;
 
   try {
-    const results = await Promise.all([
+    const dbPromise = Promise.all([
       prisma.membershipPlan.findMany({
         where: { isPublished: true, isArchived: false },
         orderBy: { price: 'asc' },
@@ -52,10 +59,14 @@ export default async function HomePage() {
         where: { id: 'default-settings' },
       }),
     ]);
-    plans = results[0];
-    trainers = results[1];
-    offers = results[2];
-    settings = results[3];
+
+    const results = await withTimeout(dbPromise, 2500, null);
+    if (results) {
+      if (results[0] && results[0].length > 0) plans = results[0];
+      if (results[1] && results[1].length > 0) trainers = results[1];
+      if (results[2] && results[2].length > 0) offers = results[2];
+      if (results[3]) settings = results[3];
+    }
   } catch (error) {
     console.error('Database connection error in HomePage:', error);
   }
@@ -94,22 +105,17 @@ export default async function HomePage() {
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
-                href="/register"
-                className="flex items-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111111] font-bold text-xs uppercase tracking-wider px-6 py-3.5 transition-all"
+                href={session ? (session.role === 'ADMIN' ? '/admin' : '/member') : '/membership'}
+                prefetch={true}
+                className="flex items-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111111] font-bold text-xs uppercase tracking-wider px-6 py-3.5 transition-all shadow-md shadow-[#C8A96B]/15"
               >
-                Enroll Membership <ArrowRight className="h-4 w-4" />
+                {session ? (session.role === 'ADMIN' ? 'Admin Portal' : 'Member Dashboard') : 'Explore Memberships'} <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="#calculator"
                 className="rounded border border-[#333333] hover:border-[#C8A96B]/60 bg-[#171717] text-[#F5F5F0] text-xs font-semibold uppercase tracking-wider px-6 py-3.5 transition-all"
               >
                 Price Calculator
-              </Link>
-              <Link
-                href="/trainers"
-                className="text-xs font-medium text-[#A0A09B] hover:text-[#C8A96B] transition-colors py-2 px-1"
-              >
-                Meet Our Master Coaches &rarr;
               </Link>
             </div>
 
@@ -217,14 +223,15 @@ export default async function HomePage() {
                     </div>
 
                     <Link
-                      href={`/register?plan=${plan.slug}`}
+                      href={session ? `/member/renew?plan=${plan.slug}` : `/register?plan=${plan.slug}`}
+                      prefetch={true}
                       className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
                         plan.isPopular
                           ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
                           : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
                       }`}
                     >
-                      Select {plan.name}
+                      {session ? `Renew with ${plan.name}` : `Select ${plan.name}`}
                     </Link>
                   </div>
                 );
@@ -308,7 +315,8 @@ export default async function HomePage() {
                     Rate: <strong className="text-[#F5F5F0]">{formatCurrency(trainer.hourlyRate)}</strong>/hr
                   </span>
                   <Link
-                    href={`/member/bookings?trainerId=${trainer.id}`}
+                    href={session ? `/member/bookings?trainerId=${trainer.id}` : '/login'}
+                    prefetch={true}
                     className="text-xs font-semibold text-[#C8A96B] hover:underline"
                   >
                     Book Session

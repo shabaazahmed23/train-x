@@ -50,27 +50,27 @@ export function Footer({ gymInfo }: FooterProps) {
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <Link href="/membership" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/membership" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Membership Packages
                 </Link>
               </li>
               <li>
-                <Link href="/trainers" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/trainers" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Master Trainers
                 </Link>
               </li>
               <li>
-                <Link href="/offers" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/offers" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Seasonal Privileges & Offers
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/about" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Club Philosophy
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/contact" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Concierge & Tours
                 </Link>
               </li>
@@ -84,27 +84,27 @@ export function Footer({ gymInfo }: FooterProps) {
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <Link href="/login" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/login" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Member & Admin Login
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/register" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Enroll Digital Account
                 </Link>
               </li>
               <li>
-                <Link href="/member/renew" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/member/renew" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Instant Renewal
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/privacy" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-[#F5F5F0] transition-colors">
+                <Link href="/terms" prefetch={true} className="hover:text-[#F5F5F0] transition-colors">
                   Terms of Membership
                 </Link>
               </li>

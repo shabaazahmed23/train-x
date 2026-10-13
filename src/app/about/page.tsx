@@ -3,15 +3,18 @@ import { Footer } from '@/components/public/Footer';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { DEFAULT_SETTINGS, withTimeout } from '@/lib/data-defaults';
 import { Award, ShieldCheck, HeartPulse, Sparkles, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AboutPage() {
   const session = await getSession();
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  let settings: any = DEFAULT_SETTINGS;
   try {
-    settings = await prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+    const dbPromise = prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+    const result = await withTimeout(dbPromise, 2500, null);
+    if (result) settings = result;
   } catch (error) {
     console.error('Database query error in AboutPage:', error);
   }
@@ -84,10 +87,11 @@ export default async function AboutPage() {
             </p>
             <div className="pt-2">
               <Link
-                href="/register"
-                className="inline-flex items-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111] font-bold text-xs uppercase tracking-wider px-6 py-3.5"
+                href={session ? (session.role === 'ADMIN' ? '/admin' : '/member') : '/register'}
+                prefetch={true}
+                className="inline-flex items-center gap-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-[#111] font-bold text-xs uppercase tracking-wider px-6 py-3.5 transition-all shadow-md shadow-[#C8A96B]/15"
               >
-                Enroll Today <ArrowRight className="h-4 w-4" />
+                {session ? (session.role === 'ADMIN' ? 'Go to Admin Portal' : 'Go to Member Dashboard') : 'Enroll Today'} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

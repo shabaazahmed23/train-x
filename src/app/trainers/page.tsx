@@ -4,17 +4,18 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/utils';
+import { DEFAULT_TRAINERS, DEFAULT_SETTINGS, withTimeout } from '@/lib/data-defaults';
 import { Dumbbell, Calendar, Clock, Star, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TrainersPage() {
   const session = await getSession();
-  let trainers: Awaited<ReturnType<typeof prisma.trainer.findMany>> = [];
-  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  let trainers: any[] = DEFAULT_TRAINERS;
+  let settings: any = DEFAULT_SETTINGS;
 
   try {
-    const results = await Promise.all([
+    const dbPromise = Promise.all([
       prisma.trainer.findMany({
         where: { isPublished: true, isActive: true },
         orderBy: { experienceYears: 'desc' },
@@ -24,8 +25,11 @@ export default async function TrainersPage() {
       }),
       prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
     ]);
-    trainers = results[0];
-    settings = results[1];
+    const results = await withTimeout(dbPromise, 2500, null);
+    if (results) {
+      if (results[0] && results[0].length > 0) trainers = results[0];
+      if (results[1]) settings = results[1];
+    }
   } catch (error) {
     console.error('Database query error in TrainersPage:', error);
   }
@@ -111,7 +115,8 @@ export default async function TrainersPage() {
                         </div>
 
                         <Link
-                          href={`/member/bookings?trainerId=${trainer.id}`}
+                          href={session ? `/member/bookings?trainerId=${trainer.id}` : '/login'}
+                          prefetch={true}
                           className="flex items-center gap-1.5 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 transition-colors"
                         >
                           Book Session <ArrowRight className="h-3 w-3" />
