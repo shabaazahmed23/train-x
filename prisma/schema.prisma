@@ -1,0 +1,534 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum DurationType {
+  MONTHLY
+  QUARTERLY
+  HALF_YEARLY
+  YEARLY
+  CUSTOM
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  ONLINE
+  CARD
+  UPI
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AttendanceMethod {
+  QR_CODE
+  MANUAL_ADMIN
+  KIOSK
+}
+
+enum WorkoutLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum WorkoutGoal {
+  WEIGHT_LOSS
+  MUSCLE_GAIN
+  ENDURANCE
+  GENERAL_FITNESS
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum NotificationType {
+  EXPIRY_WARNING
+  RENEWAL_SUCCESS
+  BOOKING_UPDATE
+  ANNOUNCEMENT
+  SYSTEM
+}
+
+enum AnnouncementAudience {
+  ALL
+  MEMBERS_ONLY
+  ADMINS_ONLY
+}
+
+enum ReminderType {
+  SEVEN_DAY
+  THREE_DAY
+  ONE_DAY
+  EXPIRY_DAY
+  POST_EXPIRY
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRYING
+  CANCELLED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(MEMBER)
+  name          String
+  phone         String?
+  avatarUrl     String?
+  emailVerified DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  profile       MemberProfile?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+}
+
+model MemberProfile {
+  id               String                 @id @default(uuid())
+  userId           String                 @unique
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membershipNumber String                 @unique
+  emergencyContact String?
+  emergencyPhone   String?
+  dateOfBirth      DateTime?
+  gender           String?
+  address          String?
+  medicalNotes     String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  memberships      Membership[]
+  renewals         MembershipRenewal[]
+  payments         Payment[]
+  attendances      Attendance[]
+  bookings         TrainerBooking[]
+  workoutPlans     WorkoutPlan[]
+  dietPlans        DietPlan[]
+  progressRecords  FitnessProgressRecord[]
+  couponRedemptions CouponRedemption[]
+
+  @@index([membershipNumber])
+}
+
+model Trainer {
+  id              String                @id @default(uuid())
+  name            String
+  email           String                @unique
+  phone           String?
+  bio             String
+  photoUrl        String?
+  specialties     String                // Comma separated e.g. "Hypertrophy, Strength, Functional"
+  experienceYears Int                   @default(3)
+  hourlyRate      Decimal               @default(800)
+  isPublished     Boolean               @default(true)
+  isActive        Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  availabilities  TrainerAvailability[]
+  bookings        TrainerBooking[]
+  workoutPlans    WorkoutPlan[]
+  dietPlans       DietPlan[]
+
+  @@index([isPublished, isActive])
+}
+
+model TrainerAvailability {
+  id                  String   @id @default(uuid())
+  trainerId           String
+  trainer             Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  dayOfWeek           Int      // 0 (Sun) to 6 (Sat)
+  startTime           String   // "06:00"
+  endTime             String   // "21:00"
+  slotDurationMinutes Int      @default(60)
+  isAvailable         Boolean  @default(true)
+
+  @@unique([trainerId, dayOfWeek])
+}
+
+model TrainerBooking {
+  id          String        @id @default(uuid())
+  trainerId   String
+  trainer     Trainer       @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  bookingDate DateTime
+  startTime   String        // "10:00"
+  endTime     String        // "11:00"
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([trainerId, bookingDate])
+  @@index([memberId])
+  @@index([status])
+}
+
+model MembershipPlan {
+  id                 String       @id @default(uuid())
+  name               String
+  slug               String       @unique
+  description        String
+  price              Decimal      @default(2999)
+  durationDays       Int          @default(30)
+  durationType       DurationType @default(MONTHLY)
+  features           String       // JSON string array of features
+  ptSessionsIncluded Int          @default(0)
+  isPopular          Boolean      @default(false)
+  isPublished        Boolean      @default(true)
+  isArchived         Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  memberships        Membership[]
+
+  @@index([isPublished, isArchived])
+}
+
+model Membership {
+  id             String              @id @default(uuid())
+  memberId       String
+  member         MemberProfile       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  planId         String
+  plan           MembershipPlan      @relation(fields: [planId], references: [id], onDelete: Restrict)
+  startDate      DateTime
+  endDate        DateTime
+  status         MembershipStatus    @default(ACTIVE)
+  agreedPrice    Decimal
+  notes          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  renewalsAsOld  MembershipRenewal[] @relation("OldMembership")
+  renewalsAsNew  MembershipRenewal[] @relation("NewMembership")
+  payments       Payment[]
+  reminders      EmailReminder[]
+
+  @@index([memberId])
+  @@index([endDate])
+  @@index([status])
+}
+
+model MembershipRenewal {
+  id              String        @id @default(uuid())
+  oldMembershipId String
+  oldMembership   Membership    @relation("OldMembership", fields: [oldMembershipId], references: [id], onDelete: Cascade)
+  newMembershipId String
+  newMembership   Membership    @relation("NewMembership", fields: [newMembershipId], references: [id], onDelete: Cascade)
+  memberId        String
+  member          MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  renewalDate     DateTime      @default(now())
+  previousEndDate DateTime
+  newEndDate      DateTime
+  renewalPrice    Decimal
+  paymentId       String?
+  payment         Payment?      @relation(fields: [paymentId], references: [id])
+  createdAt       DateTime      @default(now())
+
+  @@index([memberId])
+}
+
+model Payment {
+  id             String              @id @default(uuid())
+  memberId       String
+  member         MemberProfile       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  membershipId   String?
+  membership     Membership?         @relation(fields: [membershipId], references: [id])
+  amount         Decimal
+  currency       String              @default("INR")
+  method         PaymentMethod       @default(CASH)
+  status         PaymentStatus       @default(COMPLETED)
+  transactionRef String?             @unique
+  receiptNumber  String              @unique
+  verifiedAt     DateTime?
+  notes          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  renewals       MembershipRenewal[]
+  redemptions    CouponRedemption[]
+
+  @@index([memberId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Attendance {
+  id           String           @id @default(uuid())
+  memberId     String
+  member       MemberProfile    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  checkInTime  DateTime         @default(now())
+  checkOutTime DateTime?
+  method       AttendanceMethod @default(QR_CODE)
+  verifiedBy   String?          // e.g. "Self (QR Scanner)" or Admin name
+  notes        String?
+
+  @@index([memberId])
+  @@index([checkInTime])
+}
+
+model WorkoutTemplate {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  level       WorkoutLevel @default(BEGINNER)
+  goal        WorkoutGoal  @default(GENERAL_FITNESS)
+  daysPerWeek Int          @default(3)
+  exercises   String       // JSON string of exercise template details
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model WorkoutPlan {
+  id          String            @id @default(uuid())
+  memberId    String
+  member      MemberProfile     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainerId   String?
+  trainer     Trainer?          @relation(fields: [trainerId], references: [id])
+  title       String
+  description String?
+  startDate   DateTime          @default(now())
+  endDate     DateTime?
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  exercises   WorkoutExercise[]
+
+  @@index([memberId])
+}
+
+model WorkoutExercise {
+  id            String      @id @default(uuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  dayOfWeek     String      // e.g. "Monday - Chest & Triceps"
+  exerciseName  String
+  sets          Int
+  reps          String      // e.g. "10-12"
+  restSeconds   Int         @default(60)
+  instructions  String?
+  orderIndex    Int         @default(0)
+
+  @@index([workoutPlanId])
+}
+
+model DietPlan {
+  id            String        @id @default(uuid())
+  memberId      String
+  member        MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainerId     String?
+  trainer       Trainer?      @relation(fields: [trainerId], references: [id])
+  title         String
+  disclaimer    String        @default("Diet charts are for informational guidance only. Medical nutrition plans require consultation with a licensed clinical dietitian or doctor.")
+  dailyCalories Int?
+  proteinGrams  Int?
+  carbsGrams    Int?
+  fatGrams      Int?
+  meals         String        // JSON array of meal timing and descriptions
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([memberId])
+}
+
+model FitnessProgressRecord {
+  id                String        @id @default(uuid())
+  memberId          String
+  member            MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  recordDate        DateTime      @default(now())
+  weightKg          Decimal
+  bodyFatPercentage Decimal?
+  chestCm           Decimal?
+  waistCm           Decimal?
+  hipsCm            Decimal?
+  notes             String?
+  createdAt         DateTime      @default(now())
+
+  @@index([memberId])
+  @@index([recordDate])
+}
+
+model Offer {
+  id                String             @id @default(uuid())
+  title             String
+  code              String             @unique
+  description       String
+  discountType      DiscountType       @default(PERCENTAGE)
+  discountValue     Decimal
+  minOrderAmount    Decimal            @default(0)
+  maxDiscountAmount Decimal?
+  startDate         DateTime
+  endDate           DateTime
+  usageLimit        Int?
+  timesUsed         Int                @default(0)
+  isActive          Boolean            @default(true)
+  isPublic          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  redemptions       CouponRedemption[]
+
+  @@index([code])
+  @@index([isActive, isPublic])
+}
+
+model CouponRedemption {
+  id              String        @id @default(uuid())
+  offerId         String
+  offer           Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  memberId        String
+  member          MemberProfile @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  paymentId       String?
+  payment         Payment?      @relation(fields: [paymentId], references: [id])
+  discountApplied Decimal
+  redeemedAt      DateTime      @default(now())
+
+  @@index([offerId])
+  @@index([memberId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType @default(SYSTEM)
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+}
+
+model Announcement {
+  id             String               @id @default(uuid())
+  title          String
+  content        String
+  targetAudience AnnouncementAudience @default(ALL)
+  isPublished    Boolean              @default(true)
+  publishedAt    DateTime             @default(now())
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([isPublished])
+}
+
+model EmailReminder {
+  id                String         @id @default(uuid())
+  membershipId      String
+  membership        Membership     @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  memberEmail       String
+  reminderType      ReminderType
+  scheduledDate     DateTime
+  status            ReminderStatus @default(PENDING)
+  attemptCount      Int            @default(0)
+  providerMessageId String?
+  lastError         String?
+  sentAt            DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([membershipId, reminderType])
+  @@index([scheduledDate, status])
+}
+
+model EmailLog {
+  id                String   @id @default(uuid())
+  recipientEmail    String
+  subject           String
+  templateType      String
+  status            String   // SENT, FAILED, SIMULATED
+  provider          String
+  providerMessageId String?
+  errorDetails      String?
+  sentAt            DateTime @default(now())
+
+  @@index([recipientEmail])
+  @@index([sentAt])
+}
+
+model GymSettings {
+  id                  String   @id @default("default-settings")
+  gymName             String   @default("FITLIFE Luxury Fitness")
+  logoUrl             String?
+  contactEmail        String   @default("contact@fitlife.com")
+  contactPhone        String   @default("+91 98765 43210")
+  address             String   @default("Level 4, Signature Towers, Financial District, Bangalore, India")
+  openingHours        String   @default("Mon - Sat: 5:30 AM - 11:00 PM | Sun: 7:00 AM - 8:00 PM")
+  currencySymbol      String   @default("₹")
+  currencyCode        String   @default("INR")
+  timezone            String   @default("Asia/Kolkata")
+  reminderLeadDays    String   @default("[7,3,1,0]") // JSON array
+  allowOnlinePayments Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String?
+  admin      User?    @relation(fields: [adminId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([token])
+}
