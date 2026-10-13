@@ -3,6 +3,8 @@ import { Footer } from '@/components/public/Footer';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export default async function TermsPage() {
   const session = await getSession();
   const settings = await prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
