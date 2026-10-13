@@ -243,8 +243,8 @@ export async function sendEmail({
       messageId,
       isSimulated: false,
     };
-  } catch (err: any) {
-    const errMsg = err?.message || 'Unknown email sending failure';
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : 'Unknown email sending failure';
     await prisma.emailLog.create({
       data: {
         recipientEmail: to,

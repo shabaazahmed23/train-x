@@ -80,7 +80,7 @@ export function RenewalForm({ plans, currentMembership }: RenewalFormProps) {
       const res = await renewMembershipAction({
         planId: selectedPlan.id,
         couponCode: couponApplied?.code,
-        paymentMethod: paymentMethod as any,
+        paymentMethod: paymentMethod,
       });
 
       if (res.success && res.receiptNumber && res.newEndDate) {
@@ -95,6 +95,18 @@ export function RenewalForm({ plans, currentMembership }: RenewalFormProps) {
       }
     });
   };
+
+  if (plans.length === 0) {
+    return (
+      <div className="card-luxury p-12 text-center space-y-3 bg-[#161616] border-[#262626]">
+        <RotateCw className="mx-auto h-12 w-12 text-[#7E7E78]" />
+        <h3 className="text-base font-bold text-[#F5F5F0]">No Membership Plans Available</h3>
+        <p className="text-xs text-[#8E8E88] max-w-sm mx-auto">
+          Membership renewal packages are currently being configured by the club management. Please visit the front desk for immediate renewals.
+        </p>
+      </div>
+    );
+  }
 
   if (successResult) {
     return (
@@ -211,7 +223,7 @@ export function RenewalForm({ plans, currentMembership }: RenewalFormProps) {
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setPaymentMethod(m.id as any)}
+                  onClick={() => setPaymentMethod(m.id as 'UPI' | 'ONLINE' | 'CARD' | 'CASH')}
                   className={`p-3 rounded border text-left transition-colors ${
                     isSelected
                       ? 'border-[#C8A96B] bg-[#C8A96B]/10'

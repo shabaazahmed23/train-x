@@ -91,14 +91,37 @@ export default async function AdminDashboardPage() {
     count: p._count.memberships,
   }));
 
-  // Revenue trend data
-  const revenueTrend = [
-    { month: 'Jun', amount: Math.round(totalRevenue * 0.15) },
-    { month: 'Jul', amount: Math.round(totalRevenue * 0.22) },
-    { month: 'Aug', amount: Math.round(totalRevenue * 0.28) },
-    { month: 'Sep', amount: Math.round(totalRevenue * 0.35) },
-    { month: 'Oct', amount: totalRevenue },
-  ];
+  // Revenue trend data from real database transactions
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const currentMonthIdx = now.getMonth();
+  const monthlyRevenueMap: Record<string, number> = {};
+
+  for (let i = 4; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), currentMonthIdx - i, 1);
+    const mKey = monthNames[d.getMonth()];
+    monthlyRevenueMap[mKey] = 0;
+  }
+
+  const fiveMonthsAgo = new Date(now.getFullYear(), currentMonthIdx - 4, 1);
+  const realMonthlyPayments = await prisma.payment.findMany({
+    where: {
+      status: 'COMPLETED',
+      createdAt: { gte: fiveMonthsAgo },
+    },
+    select: { amount: true, createdAt: true },
+  });
+
+  for (const pay of realMonthlyPayments) {
+    const mName = monthNames[pay.createdAt.getMonth()];
+    if (monthlyRevenueMap[mName] !== undefined) {
+      monthlyRevenueMap[mName] += Number(pay.amount);
+    }
+  }
+
+  const revenueTrend = Object.entries(monthlyRevenueMap).map(([month, amount]) => ({
+    month,
+    amount: Math.round(amount),
+  }));
 
   return (
     <div className="space-y-8">
@@ -247,24 +270,32 @@ export default async function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1F1F1F]">
-              {recentPayments.map((p) => {
-                const color = getStatusColor(p.status);
-                return (
-                  <tr key={p.id} className="hover:bg-[#1A1A1A] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[#C8A96B]">{p.receiptNumber}</td>
-                    <td className="py-2.5 px-3 font-medium text-[#F5F5F0]">{p.member.user.name}</td>
-                    <td className="py-2.5 px-3 text-[#A0A09B]">{p.membership?.plan.name || 'Custom'}</td>
-                    <td className="py-2.5 px-3 font-bold text-[#F5F5F0]">{formatCurrency(p.amount)}</td>
-                    <td className="py-2.5 px-3 text-[#A0A09B] uppercase font-mono">{p.method}</td>
-                    <td className="py-2.5 px-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${color.bg} ${color.text} ${color.border}`}>
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-[#7E7E78]">{formatDate(p.createdAt)}</td>
-                  </tr>
-                );
-              })}
+              {recentPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-xs text-[#7E7E78]">
+                    No payment records available. Record your first transaction in the Ledger.
+                  </td>
+                </tr>
+              ) : (
+                recentPayments.map((p) => {
+                  const color = getStatusColor(p.status);
+                  return (
+                    <tr key={p.id} className="hover:bg-[#1A1A1A] transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-[#C8A96B]">{p.receiptNumber}</td>
+                      <td className="py-2.5 px-3 font-medium text-[#F5F5F0]">{p.member.user.name}</td>
+                      <td className="py-2.5 px-3 text-[#A0A09B]">{p.membership?.plan.name || 'Custom'}</td>
+                      <td className="py-2.5 px-3 font-bold text-[#F5F5F0]">{formatCurrency(p.amount)}</td>
+                      <td className="py-2.5 px-3 text-[#A0A09B] uppercase font-mono">{p.method}</td>
+                      <td className="py-2.5 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${color.bg} ${color.text} ${color.border}`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-[#7E7E78]">{formatDate(p.createdAt)}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

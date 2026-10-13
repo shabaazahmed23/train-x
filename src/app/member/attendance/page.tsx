@@ -128,7 +128,7 @@ export default async function MemberAttendancePage() {
           <div className="space-y-2.5">
             {attendances.length === 0 ? (
               <p className="text-xs text-[#7E7E78] py-8 text-center">
-                No check-in history recorded. Present your QR code at the turnstile kiosk on your next workout.
+                No attendance records for this period. Present your QR code at the turnstile kiosk on your next workout.
               </p>
             ) : (
               attendances.map((att) => (

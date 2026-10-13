@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { bookTrainerSessionAction } from '@/lib/actions';
 import { formatCurrency } from '@/lib/utils';
-import { Calendar, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface TrainerOption {
   id: string;
@@ -21,7 +21,7 @@ interface BookingFormProps {
 export function BookingForm({ trainers, preselectedTrainerId }: BookingFormProps) {
   const router = useRouter();
   const [trainerId, setTrainerId] = useState(preselectedTrainerId || trainers[0]?.id || '');
-  const [bookingDate, setBookingDate] = useState(
+  const [bookingDate, setBookingDate] = useState(() =>
     new Date(Date.now() + 86400000).toISOString().split('T')[0] // Tomorrow
   );
   const [startTime, setStartTime] = useState('10:00');
@@ -55,8 +55,6 @@ export function BookingForm({ trainers, preselectedTrainerId }: BookingFormProps
     });
   };
 
-  const selectedTrainer = trainers.find((t) => t.id === trainerId);
-
   return (
     <div className="card-luxury p-6 bg-[#161616] border-[#262626] space-y-4">
       <div className="flex items-center gap-3 border-b border-[#242424] pb-3">
@@ -86,17 +84,21 @@ export function BookingForm({ trainers, preselectedTrainerId }: BookingFormProps
       <form onSubmit={handleBooking} className="space-y-4 text-xs">
         <div>
           <label className="block text-[#A0A09B] mb-1 font-medium">Select Master Coach</label>
-          <select
-            value={trainerId}
-            onChange={(e) => setTrainerId(e.target.value)}
-            className="w-full rounded bg-[#111] border border-[#282828] px-3.5 py-2.5 text-[#F5F5F0] focus:outline-none focus:border-[#C8A96B]"
-          >
-            {trainers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} ({t.specialties}) — {formatCurrency(t.hourlyRate)}/hr
-              </option>
-            ))}
-          </select>
+          {trainers.length === 0 ? (
+            <p className="text-xs text-[#7E7E78] py-2">No certified trainers available for booking currently.</p>
+          ) : (
+            <select
+              value={trainerId}
+              onChange={(e) => setTrainerId(e.target.value)}
+              className="w-full rounded bg-[#111] border border-[#282828] px-3.5 py-2.5 text-[#F5F5F0] focus:outline-none focus:border-[#C8A96B]"
+            >
+              {trainers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.specialties}) — {formatCurrency(t.hourlyRate)}/hr
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>
@@ -153,7 +155,7 @@ export function BookingForm({ trainers, preselectedTrainerId }: BookingFormProps
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || trainers.length === 0}
           className="w-full py-3 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black font-bold uppercase text-xs tracking-wider transition-colors disabled:opacity-50"
         >
           {isPending ? 'Verifying Availability...' : 'Confirm Appointment'}

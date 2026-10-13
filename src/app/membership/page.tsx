@@ -51,65 +51,83 @@ export default async function MembershipPage() {
         {/* Pricing Cards */}
         <section className="py-20 border-b border-[#222222]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-              {plans.map((plan) => {
-                const features: string[] = plan.features ? JSON.parse(plan.features) : [];
-                return (
-                  <div
-                    key={plan.id}
-                    className={`card-luxury flex flex-col justify-between p-6 relative ${
-                      plan.isPopular ? 'border-[#C8A96B] ring-1 ring-[#C8A96B]/50' : 'border-[#262626]'
-                    }`}
+            {plans.length === 0 ? (
+              <div className="card-luxury p-12 text-center border-dashed border-[#2A2A2A] bg-[#161616]/60 max-w-xl mx-auto space-y-3 mb-20">
+                <span className="text-xs uppercase font-mono tracking-widest text-[#C8A96B]">Plans Updating</span>
+                <h3 className="text-lg font-bold text-[#F5F5F0]">No Membership Plans Available Yet</h3>
+                <p className="text-xs text-[#8E8E88] leading-relaxed">
+                  We are currently configuring our seasonal packages and training tiers. Inquire directly with our front desk for bespoke corporate or personal arrangements.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black text-xs font-bold uppercase tracking-wider transition-colors"
                   >
-                    {plan.isPopular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded bg-[#C8A96B] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black">
-                        Recommended
-                      </div>
-                    )}
-
-                    <div>
-                      <h3 className="text-lg font-bold text-[#F5F5F0]">{plan.name}</h3>
-                      <p className="text-xs text-[#8E8E88] mt-1 mb-4 min-h-[36px]">{plan.description}</p>
-
-                      <div className="flex items-baseline gap-1 my-4">
-                        <span className="text-3xl font-black text-[#C8A96B]">
-                          {formatCurrency(plan.price)}
-                        </span>
-                        <span className="text-xs text-[#7E7E78]">/ {plan.durationDays} Days</span>
-                      </div>
-
-                      <div className="border-t border-[#242424] pt-4 mb-6">
-                        <ul className="space-y-2.5 text-xs">
-                          {features.map((feat, i) => (
-                            <li key={i} className="flex items-start gap-2 text-[#D1D1CB]">
-                              <Check className="h-3.5 w-3.5 text-[#C8A96B] shrink-0 mt-0.5" />
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                          {plan.ptSessionsIncluded > 0 && (
-                            <li className="flex items-start gap-2 text-[#C8A96B] font-semibold">
-                              <Star className="h-3.5 w-3.5 shrink-0 mt-0.5 fill-[#C8A96B]" />
-                              <span>{plan.ptSessionsIncluded} Coaching Sessions Included</span>
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={`/register?plan=${plan.slug}`}
-                      className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
-                        plan.isPopular
-                          ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
-                          : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
+                    Contact Reception Desk &rarr;
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+                {plans.map((plan) => {
+                  const features: string[] = plan.features ? JSON.parse(plan.features) : [];
+                  return (
+                    <div
+                      key={plan.id}
+                      className={`card-luxury flex flex-col justify-between p-6 relative ${
+                        plan.isPopular ? 'border-[#C8A96B] ring-1 ring-[#C8A96B]/50' : 'border-[#262626]'
                       }`}
                     >
-                      Join {plan.name}
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
+                      {plan.isPopular && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded bg-[#C8A96B] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black">
+                          Recommended
+                        </div>
+                      )}
+
+                      <div>
+                        <h3 className="text-lg font-bold text-[#F5F5F0]">{plan.name}</h3>
+                        <p className="text-xs text-[#8E8E88] mt-1 mb-4 min-h-[36px]">{plan.description}</p>
+
+                        <div className="flex items-baseline gap-1 my-4">
+                          <span className="text-3xl font-black text-[#C8A96B]">
+                            {formatCurrency(plan.price)}
+                          </span>
+                          <span className="text-xs text-[#7E7E78]">/ {plan.durationDays} Days</span>
+                        </div>
+
+                        <div className="border-t border-[#242424] pt-4 mb-6">
+                          <ul className="space-y-2.5 text-xs">
+                            {features.map((feat, i) => (
+                              <li key={i} className="flex items-start gap-2 text-[#D1D1CB]">
+                                <Check className="h-3.5 w-3.5 text-[#C8A96B] shrink-0 mt-0.5" />
+                                <span>{feat}</span>
+                              </li>
+                            ))}
+                            {plan.ptSessionsIncluded > 0 && (
+                              <li className="flex items-start gap-2 text-[#C8A96B] font-semibold">
+                                <Star className="h-3.5 w-3.5 shrink-0 mt-0.5 fill-[#C8A96B]" />
+                                <span>{plan.ptSessionsIncluded} Coaching Sessions Included</span>
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/register?plan=${plan.slug}`}
+                        className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
+                          plan.isPopular
+                            ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
+                            : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
+                        }`}
+                      >
+                        Join {plan.name}
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Custom Calculator */}
             <div className="pt-8">

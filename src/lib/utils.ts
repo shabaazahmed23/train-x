@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: any): string {
+export function formatCurrency(amount: number | string | { toNumber?: () => number } | null | undefined): string {
   if (amount === null || amount === undefined) return '₹0';
   const num =
     typeof amount === 'object' && amount !== null && typeof amount.toNumber === 'function'

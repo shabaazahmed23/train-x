@@ -14,6 +14,10 @@ export default async function AdminOffersPage() {
     },
   });
 
+  const now = new Date();
+  const defaultStartDate = now.toISOString().split('T')[0];
+  const defaultEndDate = new Date(now.getTime() + 90 * 86400000).toISOString().split('T')[0];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#222] pb-6">
@@ -99,7 +103,7 @@ export default async function AdminOffersPage() {
                     name="startDate"
                     type="date"
                     required
-                    defaultValue={new Date().toISOString().split('T')[0]}
+                    defaultValue={defaultStartDate}
                     className="w-full rounded bg-[#111] border border-[#282828] px-3 py-2 text-[#F5F5F0]"
                   />
                 </div>
@@ -109,7 +113,7 @@ export default async function AdminOffersPage() {
                     name="endDate"
                     type="date"
                     required
-                    defaultValue={new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0]}
+                    defaultValue={defaultEndDate}
                     className="w-full rounded bg-[#111] border border-[#282828] px-3 py-2 text-[#F5F5F0]"
                   />
                 </div>
@@ -145,48 +149,60 @@ export default async function AdminOffersPage() {
         </details>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {offers.map((offer) => (
-          <div key={offer.id} className="card-luxury p-5 bg-[#161616] border-[#262626] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-[#C8A96B] bg-[#C8A96B]/15 px-2.5 py-1 rounded border border-[#C8A96B]/30">
-                {offer.code}
-              </span>
-              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
-                {offer.isActive ? 'Active' : 'Disabled'}
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-bold text-[#F5F5F0]">{offer.title}</h3>
-              <p className="text-xs text-[#8E8E88] mt-0.5">{offer.description}</p>
-            </div>
-
-            <div className="bg-[#121212] p-2.5 rounded border border-[#222] text-xs text-[#A0A09B] space-y-1">
-              <div className="flex justify-between">
-                <span>Discount:</span>
-                <strong className="text-[#C8A96B]">
-                  {offer.discountType === 'PERCENTAGE'
-                    ? `${offer.discountValue}%`
-                    : formatCurrency(offer.discountValue)}
-                </strong>
-              </div>
-              <div className="flex justify-between">
-                <span>Usage Count:</span>
-                <span className="text-[#F5F5F0]">
-                  {offer.timesUsed} {offer.usageLimit ? `/ ${offer.usageLimit}` : 'redemptions'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Valid:</span>
-                <span className="text-[#7E7E78]">
-                  {formatDate(offer.startDate)} &rarr; {formatDate(offer.endDate)}
-                </span>
-              </div>
-            </div>
+      {offers.length === 0 ? (
+        <div className="card-luxury p-12 text-center border-[#262626] bg-[#161616] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#222] flex items-center justify-center text-[#C8A96B] mb-4">
+            <Tag className="h-6 w-6" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-base font-bold text-[#F5F5F0]">No promotional coupons available.</h3>
+          <p className="text-xs text-[#8E8E88] mt-2 max-w-md">
+            Click &quot;Create Promo Coupon&quot; above to launch seasonal discounts or introductory membership codes.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {offers.map((offer) => (
+            <div key={offer.id} className="card-luxury p-5 bg-[#161616] border-[#262626] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-[#C8A96B] bg-[#C8A96B]/15 px-2.5 py-1 rounded border border-[#C8A96B]/30">
+                  {offer.code}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+                  {offer.isActive ? 'Active' : 'Disabled'}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-[#F5F5F0]">{offer.title}</h3>
+                <p className="text-xs text-[#8E8E88] mt-0.5">{offer.description}</p>
+              </div>
+
+              <div className="bg-[#121212] p-2.5 rounded border border-[#222] text-xs text-[#A0A09B] space-y-1">
+                <div className="flex justify-between">
+                  <span>Discount:</span>
+                  <strong className="text-[#C8A96B]">
+                    {offer.discountType === 'PERCENTAGE'
+                      ? `${offer.discountValue}%`
+                      : formatCurrency(offer.discountValue)}
+                  </strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Usage Count:</span>
+                  <span className="text-[#F5F5F0]">
+                    {offer.timesUsed} {offer.usageLimit ? `/ ${offer.usageLimit}` : 'redemptions'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Valid:</span>
+                  <span className="text-[#7E7E78]">
+                    {formatDate(offer.startDate)} &rarr; {formatDate(offer.endDate)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

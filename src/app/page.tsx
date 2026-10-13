@@ -138,68 +138,86 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => {
-              const features: string[] = plan.features ? JSON.parse(plan.features) : [];
-              return (
-                <div
-                  key={plan.id}
-                  className={`card-luxury flex flex-col justify-between p-6 relative ${
-                    plan.isPopular ? 'border-[#C8A96B] ring-1 ring-[#C8A96B]/50' : 'border-[#262626]'
-                  }`}
+          {plans.length === 0 ? (
+            <div className="card-luxury p-12 text-center border-dashed border-[#2A2A2A] bg-[#161616]/60 max-w-xl mx-auto space-y-3">
+              <span className="text-xs uppercase font-mono tracking-widest text-[#C8A96B]">Tiers Updating</span>
+              <h3 className="text-lg font-bold text-[#F5F5F0]">No Membership Plans Published Yet</h3>
+              <p className="text-xs text-[#8E8E88] leading-relaxed">
+                Our team is currently finalizing upcoming membership tiers and seasonal packages. Please visit our reception desk or contact our concierge directly.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black text-xs font-bold uppercase tracking-wider transition-colors"
                 >
-                  {plan.isPopular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded bg-[#C8A96B] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black">
-                      Most Popular
-                    </div>
-                  )}
-
-                  <div>
-                    <h3 className="text-lg font-bold text-[#F5F5F0]">{plan.name}</h3>
-                    <p className="text-xs text-[#8E8E88] mt-1 mb-4 min-h-[32px]">{plan.description}</p>
-
-                    <div className="flex items-baseline gap-1 my-4">
-                      <span className="text-3xl font-black text-[#C8A96B]">
-                        {formatCurrency(plan.price)}
-                      </span>
-                      <span className="text-xs text-[#7E7E78]">/ {plan.durationDays} Days</span>
-                    </div>
-
-                    <div className="border-t border-[#242424] pt-4 mb-6">
-                      <span className="text-[11px] font-semibold text-[#A0A09B] uppercase tracking-wider block mb-2.5">
-                        Privileges Included:
-                      </span>
-                      <ul className="space-y-2 text-xs">
-                        {features.slice(0, 5).map((feat, i) => (
-                          <li key={i} className="flex items-start gap-2 text-[#D1D1CB]">
-                            <Check className="h-3.5 w-3.5 text-[#C8A96B] shrink-0 mt-0.5" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                        {plan.ptSessionsIncluded > 0 && (
-                          <li className="flex items-start gap-2 text-[#C8A96B] font-medium">
-                            <Star className="h-3.5 w-3.5 shrink-0 mt-0.5 fill-[#C8A96B]" />
-                            <span>{plan.ptSessionsIncluded} Private PT Sessions Included</span>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/register?plan=${plan.slug}`}
-                    className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
-                      plan.isPopular
-                        ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
-                        : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
+                  Contact Concierge Desk &rarr;
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {plans.map((plan) => {
+                const features: string[] = plan.features ? JSON.parse(plan.features) : [];
+                return (
+                  <div
+                    key={plan.id}
+                    className={`card-luxury flex flex-col justify-between p-6 relative ${
+                      plan.isPopular ? 'border-[#C8A96B] ring-1 ring-[#C8A96B]/50' : 'border-[#262626]'
                     }`}
                   >
-                    Select {plan.name}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
+                    {plan.isPopular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded bg-[#C8A96B] px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black">
+                        Most Popular
+                      </div>
+                    )}
+
+                    <div>
+                      <h3 className="text-lg font-bold text-[#F5F5F0]">{plan.name}</h3>
+                      <p className="text-xs text-[#8E8E88] mt-1 mb-4 min-h-[32px]">{plan.description}</p>
+
+                      <div className="flex items-baseline gap-1 my-4">
+                        <span className="text-3xl font-black text-[#C8A96B]">
+                          {formatCurrency(plan.price)}
+                        </span>
+                        <span className="text-xs text-[#7E7E78]">/ {plan.durationDays} Days</span>
+                      </div>
+
+                      <div className="border-t border-[#242424] pt-4 mb-6">
+                        <span className="text-[11px] font-semibold text-[#A0A09B] uppercase tracking-wider block mb-2.5">
+                          Privileges Included:
+                        </span>
+                        <ul className="space-y-2 text-xs">
+                          {features.slice(0, 5).map((feat, i) => (
+                            <li key={i} className="flex items-start gap-2 text-[#D1D1CB]">
+                              <Check className="h-3.5 w-3.5 text-[#C8A96B] shrink-0 mt-0.5" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                          {plan.ptSessionsIncluded > 0 && (
+                            <li className="flex items-start gap-2 text-[#C8A96B] font-medium">
+                              <Star className="h-3.5 w-3.5 shrink-0 mt-0.5 fill-[#C8A96B]" />
+                              <span>{plan.ptSessionsIncluded} Private PT Sessions Included</span>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/register?plan=${plan.slug}`}
+                      className={`w-full text-center py-2.5 px-4 rounded text-xs font-bold uppercase tracking-wider transition-all ${
+                        plan.isPopular
+                          ? 'bg-[#C8A96B] hover:bg-[#DFCA98] text-black'
+                          : 'border border-[#383838] hover:border-[#C8A96B] text-[#F5F5F0]'
+                      }`}
+                    >
+                      Select {plan.name}
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -371,65 +389,50 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Testimonials (Sample Fictional Content for Demo) */}
+      {/* Club Standards & Philosophy */}
       <section className="py-24 bg-[#141414] border-b border-[#222222]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
             <span className="text-xs uppercase font-bold tracking-widest text-[#C8A96B]">
-              Member Experiences
+              The FITLIFE Standard
             </span>
             <h2 className="text-3xl font-extrabold text-[#F5F5F0]">
-              Voices from Our Training Floor
+              Built for Serious Transformation
             </h2>
-            <p className="text-xs text-[#70706B]">
-              * Clearly identified sample member testimonials for demonstration purposes.
+            <p className="text-xs sm:text-sm text-[#A0A09B]">
+              A luxury training floor engineered around precision biomechanics, recovery science, and dignified hospitality.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card-luxury p-6 space-y-4">
-              <div className="flex text-[#C8A96B] gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-[#C8A96B]" />
-                ))}
+            <div className="card-luxury p-6 space-y-4 border-[#262626]">
+              <div className="text-[#C8A96B] font-mono text-xs uppercase tracking-wider">
+                01 / Equipment Integrity
               </div>
-              <p className="text-xs text-[#D1D1CB] leading-relaxed italic">
-                &ldquo;The equipment selection here is unparalleled. Having competition Eleiko bars and plates makes high-load squats and cleans a dream. The recovery sauna after 6:00 AM sessions sets my entire workday up for success.&rdquo;
+              <h3 className="text-base font-bold text-[#F5F5F0]">Calibration-Certified Rigs & Barbells</h3>
+              <p className="text-xs text-[#8E8E88] leading-relaxed">
+                Every barbell, disc, and rack on our floor conforms to international powerlifting and weightlifting specifications. Sound-isolated drop platforms protect your joints and focus.
               </p>
-              <div className="pt-2 border-t border-[#242424]">
-                <strong className="text-xs text-[#F5F5F0] block">Devendra Nambiar</strong>
-                <span className="text-[10px] text-[#C8A96B]">Gold Performance Member &bull; 2 Years</span>
-              </div>
             </div>
 
-            <div className="card-luxury p-6 space-y-4">
-              <div className="flex text-[#C8A96B] gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-[#C8A96B]" />
-                ))}
+            <div className="card-luxury p-6 space-y-4 border-[#262626]">
+              <div className="text-[#C8A96B] font-mono text-xs uppercase tracking-wider">
+                02 / Athletic Recovery
               </div>
-              <p className="text-xs text-[#D1D1CB] leading-relaxed italic">
-                &ldquo;Working with Coach Ananya transformed my persistent back stiffness. The combination of targeted mobility, functional Pilates, and custom diet charts took 14 kg off my frame sustainably.&rdquo;
+              <h3 className="text-base font-bold text-[#F5F5F0]">Thermal Suites & Contrast Therapy</h3>
+              <p className="text-xs text-[#8E8E88] leading-relaxed">
+                Finnish cedar dry saunas, infrared thermal benches, and 4°C chilled hydrotherapy baths support accelerated nervous recovery and reduced delayed onset muscle soreness.
               </p>
-              <div className="pt-2 border-t border-[#242424]">
-                <strong className="text-xs text-[#F5F5F0] block">Meera Krishnan</strong>
-                <span className="text-[10px] text-[#C8A96B]">Platinum Elite Member &bull; 1 Year</span>
-              </div>
             </div>
 
-            <div className="card-luxury p-6 space-y-4">
-              <div className="flex text-[#C8A96B] gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-[#C8A96B]" />
-                ))}
+            <div className="card-luxury p-6 space-y-4 border-[#262626]">
+              <div className="text-[#C8A96B] font-mono text-xs uppercase tracking-wider">
+                03 / Digital Autonomy
               </div>
-              <p className="text-xs text-[#D1D1CB] leading-relaxed italic">
-                &ldquo;The digital portal is silky smooth. I receive automated renewal alerts before my plan ends, my attendance history logs automatically via QR, and I can book trainer appointments with zero friction.&rdquo;
+              <h3 className="text-base font-bold text-[#F5F5F0]">Frictionless Member Portal</h3>
+              <p className="text-xs text-[#8E8E88] leading-relaxed">
+                Manage your membership with full independence: instant QR turnstile scans, transparent renewal schedules, coach booking calendars, and digital invoice generation.
               </p>
-              <div className="pt-2 border-t border-[#242424]">
-                <strong className="text-xs text-[#F5F5F0] block">Rohan Chawla</strong>
-                <span className="text-[10px] text-[#C8A96B]">Black Diamond VIP Member &bull; 3 Years</span>
-              </div>
             </div>
           </div>
         </div>

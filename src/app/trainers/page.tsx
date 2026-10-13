@@ -42,58 +42,77 @@ export default async function TrainersPage() {
 
         <section className="py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {trainers.map((trainer) => (
-                <div key={trainer.id} className="card-luxury p-6 flex flex-col sm:flex-row gap-6 items-start">
-                  <div className="h-44 w-44 shrink-0 rounded-lg overflow-hidden bg-[#222] border border-[#333]">
-                    {trainer.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={trainer.photoUrl}
-                        alt={trainer.name}
-                        className="h-full w-full object-cover object-top"
-                      />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-[#7E7E78]">
-                        <Dumbbell className="h-10 w-10" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-[#F5F5F0]">{trainer.name}</h3>
-                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#C8A96B]/15 text-[#C8A96B] border border-[#C8A96B]/30">
-                          {trainer.experienceYears}+ Yrs Coaching
-                        </span>
-                      </div>
-                      <p className="text-xs font-semibold text-[#C8A96B] mt-0.5">
-                        {trainer.specialties}
-                      </p>
-                    </div>
-
-                    <p className="text-xs text-[#8E8E88] leading-relaxed">
-                      {trainer.bio}
-                    </p>
-
-                    <div className="pt-2 border-t border-[#242424] flex items-center justify-between text-xs">
-                      <div>
-                        <span className="text-[#A0A09B]">Session Investment: </span>
-                        <strong className="text-[#F5F5F0]">{formatCurrency(trainer.hourlyRate)}/hr</strong>
-                      </div>
-
-                      <Link
-                        href={`/member/bookings?trainerId=${trainer.id}`}
-                        className="flex items-center gap-1.5 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 transition-colors"
-                      >
-                        Book Session <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  </div>
+            {trainers.length === 0 ? (
+              <div className="card-luxury p-12 text-center border-dashed border-[#2A2A2A] bg-[#161616]/60 max-w-xl mx-auto space-y-3">
+                <Dumbbell className="h-10 w-10 text-[#C8A96B] mx-auto opacity-40 mb-2" />
+                <span className="text-xs uppercase font-mono tracking-widest text-[#C8A96B]">Coaching Faculty</span>
+                <h3 className="text-lg font-bold text-[#F5F5F0]">No Trainers Added Yet</h3>
+                <p className="text-xs text-[#8E8E88] leading-relaxed">
+                  Our certified personal coaching roster is currently being scheduled for the upcoming season. Inquire at our front desk for bespoke private training.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black text-xs font-bold uppercase tracking-wider transition-colors"
+                  >
+                    Contact Concierge &rarr;
+                  </Link>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {trainers.map((trainer) => (
+                  <div key={trainer.id} className="card-luxury p-6 flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="h-44 w-44 shrink-0 rounded-lg overflow-hidden bg-[#222] border border-[#333]">
+                      {trainer.photoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={trainer.photoUrl}
+                          alt={trainer.name}
+                          className="h-full w-full object-cover object-top"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-[#7E7E78]">
+                          <Dumbbell className="h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-bold text-[#F5F5F0]">{trainer.name}</h3>
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#C8A96B]/15 text-[#C8A96B] border border-[#C8A96B]/30">
+                            {trainer.experienceYears}+ Yrs Coaching
+                          </span>
+                        </div>
+                        <p className="text-xs font-semibold text-[#C8A96B] mt-0.5">
+                          {trainer.specialties}
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-[#8E8E88] leading-relaxed">
+                        {trainer.bio}
+                      </p>
+
+                      <div className="pt-2 border-t border-[#242424] flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-[#A0A09B]">Session Investment: </span>
+                          <strong className="text-[#F5F5F0]">{formatCurrency(trainer.hourlyRate)}/hr</strong>
+                        </div>
+
+                        <Link
+                          href={`/member/bookings?trainerId=${trainer.id}`}
+                          className="flex items-center gap-1.5 rounded bg-[#C8A96B] hover:bg-[#DFCA98] text-black font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 transition-colors"
+                        >
+                          Book Session <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

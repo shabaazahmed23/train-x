@@ -21,7 +21,7 @@ interface PricingCalculatorProps {
 }
 
 export function PricingCalculator({ plans }: PricingCalculatorProps) {
-  const [selectedPlanId, setSelectedPlanId] = useState<string>(plans[0]?.id || '');
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(plans?.[0]?.id || '');
   const [extraPtSessions, setExtraPtSessions] = useState<number>(0);
   const [includeVipLocker, setIncludeVipLocker] = useState<boolean>(false);
   const [includeSaunaPass, setIncludeSaunaPass] = useState<boolean>(false);
@@ -32,6 +32,18 @@ export function PricingCalculator({ plans }: PricingCalculatorProps) {
   } | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="card-luxury p-10 text-center border-dashed border-[#2A2A2A] bg-[#161616]/60 max-w-xl mx-auto space-y-3">
+        <Calculator className="h-8 w-8 text-[#C8A96B] mx-auto opacity-50" />
+        <h3 className="text-base font-bold text-[#F5F5F0]">Estimator Available Once Plans Are Configured</h3>
+        <p className="text-xs text-[#8E8E88] leading-relaxed">
+          The interactive price estimator activates automatically as soon as membership packages are published by club administration.
+        </p>
+      </div>
+    );
+  }
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) || plans[0];
 

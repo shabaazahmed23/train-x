@@ -31,10 +31,11 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString(),
       summary,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error in reminder engine';
     console.error('Cron reminder job error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error in reminder engine' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

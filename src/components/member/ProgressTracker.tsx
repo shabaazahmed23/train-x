@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -12,7 +11,7 @@ import {
 } from 'recharts';
 import { logFitnessProgressAction } from '@/lib/actions';
 import { formatDate } from '@/lib/utils';
-import { TrendingUp, Plus, Scale, Percent } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface ProgressRecord {
   id: string;
@@ -68,7 +67,7 @@ export function ProgressTracker({ records }: ProgressTrackerProps) {
                     color: '#F5F5F0',
                     fontSize: '12px',
                   }}
-                  formatter={(value: any) => [`${value} kg`, 'Weight']}
+                  formatter={(value) => [`${value} kg`, 'Weight']}
                 />
                 <Line
                   type="monotone"
@@ -169,15 +168,23 @@ export function ProgressTracker({ records }: ProgressTrackerProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1F1F1F]">
-                {records.map((r) => (
-                  <tr key={r.id} className="hover:bg-[#1A1A1A] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[#F5F5F0]">{formatDate(r.recordDate)}</td>
-                    <td className="py-2.5 px-3 font-bold text-[#C8A96B]">{Number(r.weightKg)} kg</td>
-                    <td className="py-2.5 px-3 text-[#A0A09B]">{r.bodyFatPercentage ? `${Number(r.bodyFatPercentage)}%` : '—'}</td>
-                    <td className="py-2.5 px-3 text-[#A0A09B]">{r.waistCm ? `${Number(r.waistCm)} cm` : '—'}</td>
-                    <td className="py-2.5 px-3 text-[#7E7E78] max-w-xs truncate">{r.notes || '—'}</td>
+                {records.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-xs text-[#7E7E78]">
+                      No biometric entries logged yet. Record your initial weight using the form on the left.
+                    </td>
                   </tr>
-                ))}
+                ) : (
+                  records.map((r) => (
+                    <tr key={r.id} className="hover:bg-[#1A1A1A] transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-[#F5F5F0]">{formatDate(r.recordDate)}</td>
+                      <td className="py-2.5 px-3 font-bold text-[#C8A96B]">{Number(r.weightKg)} kg</td>
+                      <td className="py-2.5 px-3 text-[#A0A09B]">{r.bodyFatPercentage ? `${Number(r.bodyFatPercentage)}%` : '—'}</td>
+                      <td className="py-2.5 px-3 text-[#A0A09B]">{r.waistCm ? `${Number(r.waistCm)} cm` : '—'}</td>
+                      <td className="py-2.5 px-3 text-[#7E7E78] max-w-xs truncate">{r.notes || '—'}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

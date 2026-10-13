@@ -22,7 +22,6 @@ interface AnalyticsChartsProps {
 export function AnalyticsCharts({
   revenueTrend,
   planDistribution,
-  attendanceDays,
 }: AnalyticsChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -39,43 +38,52 @@ export function AnalyticsCharts({
         </div>
 
         <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C8A96B" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#C8A96B" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
-              <XAxis dataKey="month" stroke="#7E7E78" fontSize={11} tickLine={false} />
-              <YAxis
-                stroke="#7E7E78"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) => `₹${v >= 1000 ? `${v / 1000}k` : v}`}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#181818',
-                  borderColor: '#333333',
-                  borderRadius: '6px',
-                  color: '#F5F5F0',
-                  fontSize: '12px',
-                }}
-                formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Revenue']}
-              />
-              <Area
-                type="monotone"
-                dataKey="amount"
-                stroke="#C8A96B"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#goldGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {revenueTrend.length === 0 || revenueTrend.every((r) => r.amount === 0) ? (
+            <div className="h-full w-full flex flex-col items-center justify-center border border-dashed border-[#262626] rounded-lg text-center p-6 space-y-1">
+              <span className="text-xs font-semibold text-[#8E8E88]">No payment records available.</span>
+              <p className="text-[11px] text-[#5A5A55]">
+                Monthly collections will graph dynamically as member payments are recorded in the ledger.
+              </p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#C8A96B" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#C8A96B" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
+                <XAxis dataKey="month" stroke="#7E7E78" fontSize={11} tickLine={false} />
+                <YAxis
+                  stroke="#7E7E78"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `₹${v >= 1000 ? `${v / 1000}k` : v}`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#181818',
+                    borderColor: '#333333',
+                    borderRadius: '6px',
+                    color: '#F5F5F0',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value) => [formatCurrency(Number(value) || 0), 'Revenue']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#C8A96B"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#goldGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -92,24 +100,33 @@ export function AnalyticsCharts({
         </div>
 
         <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={planDistribution} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
-              <XAxis dataKey="name" stroke="#7E7E78" fontSize={10} tickLine={false} interval={0} />
-              <YAxis stroke="#7E7E78" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#181818',
-                  borderColor: '#333333',
-                  borderRadius: '6px',
-                  color: '#F5F5F0',
-                  fontSize: '12px',
-                }}
-                formatter={(value: any) => [`${value} Members`, 'Enrollments']}
-              />
-              <Bar dataKey="count" fill="#C8A96B" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {planDistribution.length === 0 || planDistribution.every((p) => p.count === 0) ? (
+            <div className="h-full w-full flex flex-col items-center justify-center border border-dashed border-[#262626] rounded-lg text-center p-6 space-y-1">
+              <span className="text-xs font-semibold text-[#8E8E88]">No active plan enrollments yet.</span>
+              <p className="text-[11px] text-[#5A5A55]">
+                Distribution by tier will appear once members are assigned active plans.
+              </p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={planDistribution} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
+                <XAxis dataKey="name" stroke="#7E7E78" fontSize={10} tickLine={false} interval={0} />
+                <YAxis stroke="#7E7E78" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#181818',
+                    borderColor: '#333333',
+                    borderRadius: '6px',
+                    color: '#F5F5F0',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value) => [`${value} Members`, 'Enrollments']}
+                />
+                <Bar dataKey="count" fill="#C8A96B" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
     </div>

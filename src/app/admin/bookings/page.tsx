@@ -44,7 +44,7 @@ export default async function AdminBookingsPage() {
               {bookings.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-xs text-[#7E7E78]">
-                    No trainer sessions booked yet.
+                    No upcoming trainer bookings.
                   </td>
                 </tr>
               ) : (

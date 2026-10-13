@@ -129,8 +129,19 @@ export default async function AdminPlansPage() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((p) => {
+      {plans.length === 0 ? (
+        <div className="card-luxury p-12 text-center border-[#262626] bg-[#161616] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#222] flex items-center justify-center text-[#C8A96B] mb-4">
+            <Plus className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-bold text-[#F5F5F0]">No membership plans available. Create your first plan.</h3>
+          <p className="text-xs text-[#8E8E88] mt-2 max-w-md">
+            Click &quot;Create New Plan&quot; above to establish your membership tiers such as Monthly, Quarterly, or Annual packages.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {plans.map((p) => {
           const features: string[] = p.features ? JSON.parse(p.features) : [];
           return (
             <div
@@ -195,7 +206,8 @@ export default async function AdminPlansPage() {
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

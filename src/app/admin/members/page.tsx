@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { formatDate, formatCurrency, getStatusColor, calculateRemainingDays } from '@/lib/utils';
 import { adminCreateMemberAction } from '@/lib/actions';
 import {
@@ -25,7 +26,7 @@ export default async function AdminMembersPage({
   const now = new Date();
 
   // Filter conditions
-  const whereClause: any = {};
+  const whereClause: Prisma.MemberProfileWhereInput = {};
   if (q) {
     whereClause.OR = [
       { user: { name: { contains: q, mode: 'insensitive' } } },
@@ -226,8 +227,19 @@ export default async function AdminMembersPage({
             <tbody className="divide-y divide-[#1F1F1F]">
               {filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-xs text-[#7E7E78]">
-                    No members match the query filters.
+                  <td colSpan={6} className="py-12 text-center text-xs text-[#7E7E78]">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <p className="text-sm font-semibold text-[#F5F5F0]">
+                        {members.length === 0
+                          ? 'No members registered yet. Add your first member to get started.'
+                          : 'No members match the query filters.'}
+                      </p>
+                      {members.length === 0 && (
+                        <p className="text-[11px] text-[#8E8E88]">
+                          Click &quot;Enroll Member&quot; above to register your first gym member.
+                        </p>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (

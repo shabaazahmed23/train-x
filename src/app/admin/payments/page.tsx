@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { formatCurrency, formatDate, getStatusColor, generateReceiptNumber } from '@/lib/utils';
 import { CreditCard, Plus, Receipt, Filter } from 'lucide-react';
-import { PaymentMethod, PaymentStatus } from '@prisma/client';
+import { PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export default async function AdminPaymentsPage({
 }) {
   const { method, status } = await searchParams;
 
-  const whereClause: any = {};
+  const whereClause: Prisma.PaymentWhereInput = {};
   if (method) whereClause.method = method as PaymentMethod;
   if (status) whereClause.status = status as PaymentStatus;
 
@@ -185,7 +185,21 @@ export default async function AdminPaymentsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1F1F1F]">
-              {payments.map((p) => {
+              {payments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-xs text-[#7E7E78]">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <p className="text-sm font-semibold text-[#F5F5F0]">
+                        No payment records available.
+                      </p>
+                      <p className="text-[11px] text-[#8E8E88]">
+                        Click &quot;Record Cash / POS Payment&quot; above to log an offline transaction or desk fee.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                payments.map((p) => {
                 const color = getStatusColor(p.status);
                 return (
                   <tr key={p.id} className="hover:bg-[#1A1A1A] transition-colors">
@@ -207,7 +221,8 @@ export default async function AdminPaymentsPage({
                     <td className="py-3 px-4 text-[#7E7E78]">{formatDate(p.createdAt)}</td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>

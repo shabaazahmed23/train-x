@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getSession();
     if (!session || session.role !== 'ADMIN') {
@@ -59,7 +59,8 @@ export async function GET(req: NextRequest) {
         'Content-Disposition': `attachment; filename="fitlife-members-export-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Export failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

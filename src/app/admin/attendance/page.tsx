@@ -73,7 +73,7 @@ export default async function AdminAttendancePage() {
                 {todayLogs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-xs text-[#7E7E78]">
-                      No check-ins logged yet today. Use the simulator kiosk to scan a member.
+                      No attendance records for this period. Use the simulator kiosk to record member check-in.
                     </td>
                   </tr>
                 ) : (

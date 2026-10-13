@@ -54,7 +54,7 @@ export default async function MemberPaymentsPage() {
               {payments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-xs text-[#7E7E78]">
-                    No transaction records on file.
+                    No payment records available.
                   </td>
                 </tr>
               ) : (

@@ -59,7 +59,18 @@ async function main() {
   });
   console.log(`✓ Admin user verified: ${adminUser.email}`);
 
-  // 3. Membership Plans
+  // Only seed sample demo records if explicitly requested via SEED_DEMO_DATA=true
+  if (process.env.SEED_DEMO_DATA !== 'true') {
+    console.log('\n🎉 FITLIFE Production Setup Completed Successfully!');
+    console.log('--------------------------------------------------');
+    console.log(`Administrator Login: ${adminEmail}`);
+    console.log(`Administrator Pass:  ${adminRawPassword}`);
+    console.log('Database Status: Clean operational state with zero dummy records.');
+    console.log('--------------------------------------------------\n');
+    return;
+  }
+
+  // 3. Membership Plans (Demo Data)
   const plansData = [
     {
       name: 'Silver Fitness',

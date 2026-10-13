@@ -93,7 +93,7 @@ export default async function AdminEmailsPage() {
                 {reminders.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-xs text-[#7E7E78]">
-                      No automated reminders logged yet. Click &quot;Run Reminder Engine Now&quot; to scan for expiring memberships!
+                      No renewal reminders are pending. Click &quot;Run Reminder Engine Now&quot; to scan for expiring memberships.
                     </td>
                   </tr>
                 ) : (

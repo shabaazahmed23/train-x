@@ -29,18 +29,43 @@ test('Business Logic: early renewal date preservation calculation', () => {
 });
 
 test('Business Logic: server-side coupon validation enforces constraints', async () => {
-  // Test coupon from seeded DB: FITLIFE20 (20% off with min spend 5000)
-  const validResult = await validateCouponServer('FITLIFE20', 7999);
-  assert.strictEqual(validResult.valid, true);
-  assert.strictEqual(validResult.code, 'FITLIFE20');
-  assert.strictEqual(validResult.discountAmount, Math.round((7999 * 20) / 100));
+  const testCode = `TEST_COUPON_${Date.now()}`;
+  let couponId = '';
 
-  // Test minimum spend restriction (order 2999 is below 5000)
-  const minSpendResult = await validateCouponServer('FITLIFE20', 2999);
-  assert.strictEqual(minSpendResult.valid, false);
-  assert.ok(minSpendResult.error?.includes('Minimum order'));
+  try {
+    // Create temporary test coupon fixture
+    const coupon = await prisma.offer.create({
+      data: {
+        title: 'Temporary Test Offer',
+        code: testCode,
+        description: 'Temporary Test Offer Description',
+        discountType: 'PERCENTAGE',
+        discountValue: 20,
+        minOrderAmount: 5000,
+        startDate: new Date(Date.now() - 86400000),
+        endDate: new Date(Date.now() + 86400000 * 30),
+        isActive: true,
+      },
+    });
+    couponId = coupon.id;
 
-  // Test invalid coupon
-  const invalidResult = await validateCouponServer('NON_EXISTENT_CODE_XYZ', 10000);
-  assert.strictEqual(invalidResult.valid, false);
+    // Test coupon valid (20% off with min spend 5000)
+    const validResult = await validateCouponServer(testCode, 7999);
+    assert.strictEqual(validResult.valid, true);
+    assert.strictEqual(validResult.code, testCode);
+    assert.strictEqual(validResult.discountAmount, Math.round((7999 * 20) / 100));
+
+    // Test minimum spend restriction (order 2999 is below 5000)
+    const minSpendResult = await validateCouponServer(testCode, 2999);
+    assert.strictEqual(minSpendResult.valid, false);
+    assert.ok(minSpendResult.error?.includes('Minimum order'));
+
+    // Test invalid non-existent coupon
+    const invalidResult = await validateCouponServer('NON_EXISTENT_CODE_XYZ', 10000);
+    assert.strictEqual(invalidResult.valid, false);
+  } finally {
+    if (couponId) {
+      await prisma.offer.deleteMany({ where: { id: couponId } });
+    }
+  }
 });

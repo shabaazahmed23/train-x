@@ -119,38 +119,50 @@ export default async function AdminTrainersPage() {
         </details>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {trainers.map((t) => (
-          <div key={t.id} className="card-luxury p-6 flex flex-col sm:flex-row gap-5 items-start bg-[#161616] border-[#262626]">
-            <div className="h-28 w-28 shrink-0 rounded bg-[#222] border border-[#333] overflow-hidden">
-              {t.photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={t.photoUrl} alt={t.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-[#7E7E78]">
-                  <Dumbbell className="h-8 w-8" />
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-[#F5F5F0]">{t.name}</h3>
-                <span className="text-[10px] font-mono text-[#C8A96B] bg-[#C8A96B]/15 px-2 py-0.5 rounded border border-[#C8A96B]/30">
-                  {t.experienceYears} Yrs Exp
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-[#C8A96B]">{t.specialties}</p>
-              <p className="text-[#8E8E88] line-clamp-2">{t.bio}</p>
-
-              <div className="pt-2 border-t border-[#222] flex items-center justify-between text-[11px]">
-                <span className="text-[#A0A09B]">Rate: <strong className="text-[#F5F5F0]">{formatCurrency(t.hourlyRate)}/hr</strong></span>
-                <span className="text-[#A0A09B] font-mono">{t._count.bookings} Bookings</span>
-              </div>
-            </div>
+      {trainers.length === 0 ? (
+        <div className="card-luxury p-12 text-center border-[#262626] bg-[#161616] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#222] flex items-center justify-center text-[#C8A96B] mb-4">
+            <Dumbbell className="h-6 w-6" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-base font-bold text-[#F5F5F0]">No trainers have been added yet.</h3>
+          <p className="text-xs text-[#8E8E88] mt-2 max-w-md">
+            Click &quot;Add Trainer&quot; above to onboard your certified personal trainers and coaches.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {trainers.map((t) => (
+            <div key={t.id} className="card-luxury p-6 flex flex-col sm:flex-row gap-5 items-start bg-[#161616] border-[#262626]">
+              <div className="h-28 w-28 shrink-0 rounded bg-[#222] border border-[#333] overflow-hidden">
+                {t.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={t.photoUrl} alt={t.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-[#7E7E78]">
+                    <Dumbbell className="h-8 w-8" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[#F5F5F0]">{t.name}</h3>
+                  <span className="text-[10px] font-mono text-[#C8A96B] bg-[#C8A96B]/15 px-2 py-0.5 rounded border border-[#C8A96B]/30">
+                    {t.experienceYears} Yrs Exp
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-[#C8A96B]">{t.specialties}</p>
+                <p className="text-[#8E8E88] line-clamp-2">{t.bio}</p>
+
+                <div className="pt-2 border-t border-[#222] flex items-center justify-between text-[11px]">
+                  <span className="text-[#A0A09B]">Rate: <strong className="text-[#F5F5F0]">{formatCurrency(t.hourlyRate)}/hr</strong></span>
+                  <span className="text-[#A0A09B] font-mono">{t._count.bookings} Bookings</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

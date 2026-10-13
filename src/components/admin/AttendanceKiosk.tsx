@@ -3,12 +3,12 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { processAttendanceCheckInAction } from '@/lib/actions';
-import { QrCode, CheckCircle2, XCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { QrCode, CheckCircle2, XCircle } from 'lucide-react';
 
 export function AttendanceKiosk() {
   const router = useRouter();
   const [memberIdInput, setMemberIdInput] = useState('');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Awaited<ReturnType<typeof processAttendanceCheckInAction>> | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleScan = (idToProcess?: string) => {
