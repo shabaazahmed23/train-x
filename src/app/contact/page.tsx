@@ -9,7 +9,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function ContactPage() {
   const session = await getSession();
-  const settings = await prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+  try {
+    settings = await prisma.gymSettings.findUnique({ where: { id: 'default-settings' } });
+  } catch (error) {
+    console.error('Database query error in ContactPage:', error);
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#111111]">

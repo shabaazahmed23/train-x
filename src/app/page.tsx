@@ -26,26 +26,39 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const session = await getSession();
 
-  // Load live data from the database
-  const [plans, trainers, offers, settings] = await Promise.all([
-    prisma.membershipPlan.findMany({
-      where: { isPublished: true, isArchived: false },
-      orderBy: { price: 'asc' },
-    }),
-    prisma.trainer.findMany({
-      where: { isPublished: true, isActive: true },
-      take: 4,
-      orderBy: { experienceYears: 'desc' },
-    }),
-    prisma.offer.findMany({
-      where: { isActive: true, isPublic: true },
-      take: 3,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.gymSettings.findUnique({
-      where: { id: 'default-settings' },
-    }),
-  ]);
+  // Load live data from the database safely with fallbacks
+  let plans: Awaited<ReturnType<typeof prisma.membershipPlan.findMany>> = [];
+  let trainers: Awaited<ReturnType<typeof prisma.trainer.findMany>> = [];
+  let offers: Awaited<ReturnType<typeof prisma.offer.findMany>> = [];
+  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+
+  try {
+    const results = await Promise.all([
+      prisma.membershipPlan.findMany({
+        where: { isPublished: true, isArchived: false },
+        orderBy: { price: 'asc' },
+      }),
+      prisma.trainer.findMany({
+        where: { isPublished: true, isActive: true },
+        take: 4,
+        orderBy: { experienceYears: 'desc' },
+      }),
+      prisma.offer.findMany({
+        where: { isActive: true, isPublic: true },
+        take: 3,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.gymSettings.findUnique({
+        where: { id: 'default-settings' },
+      }),
+    ]);
+    plans = results[0];
+    trainers = results[1];
+    offers = results[2];
+    settings = results[3];
+  } catch (error) {
+    console.error('Database connection error in HomePage:', error);
+  }
 
   const calculatorPlans = plans.map((p) => ({
     id: p.id,

@@ -11,13 +11,22 @@ export const dynamic = 'force-dynamic';
 
 export default async function MembershipPage() {
   const session = await getSession();
-  const [plans, settings] = await Promise.all([
-    prisma.membershipPlan.findMany({
-      where: { isPublished: true, isArchived: false },
-      orderBy: { price: 'asc' },
-    }),
-    prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
-  ]);
+  let plans: Awaited<ReturnType<typeof prisma.membershipPlan.findMany>> = [];
+  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+
+  try {
+    const results = await Promise.all([
+      prisma.membershipPlan.findMany({
+        where: { isPublished: true, isArchived: false },
+        orderBy: { price: 'asc' },
+      }),
+      prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
+    ]);
+    plans = results[0];
+    settings = results[1];
+  } catch (error) {
+    console.error('Database query error in MembershipPage:', error);
+  }
 
   const calculatorPlans = plans.map((p) => ({
     id: p.id,

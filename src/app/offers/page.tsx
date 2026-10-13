@@ -10,13 +10,22 @@ export const dynamic = 'force-dynamic';
 
 export default async function OffersPage() {
   const session = await getSession();
-  const [offers, settings] = await Promise.all([
-    prisma.offer.findMany({
-      where: { isActive: true, isPublic: true },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
-  ]);
+  let offers: Awaited<ReturnType<typeof prisma.offer.findMany>> = [];
+  let settings: Awaited<ReturnType<typeof prisma.gymSettings.findUnique>> = null;
+
+  try {
+    const results = await Promise.all([
+      prisma.offer.findMany({
+        where: { isActive: true, isPublic: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.gymSettings.findUnique({ where: { id: 'default-settings' } }),
+    ]);
+    offers = results[0];
+    settings = results[1];
+  } catch (error) {
+    console.error('Database query error in OffersPage:', error);
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#111111]">

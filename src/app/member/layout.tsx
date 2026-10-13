@@ -16,9 +16,14 @@ export default async function MemberLayout({
     redirect('/login');
   }
 
-  const profile = await prisma.memberProfile.findUnique({
-    where: { userId: session.id },
-  });
+  let profile: Awaited<ReturnType<typeof prisma.memberProfile.findUnique>> = null;
+  try {
+    profile = await prisma.memberProfile.findUnique({
+      where: { userId: session.id },
+    });
+  } catch (error) {
+    console.error('Database query error in MemberLayout:', error);
+  }
 
   return (
     <div className="flex min-h-screen bg-[#111111] text-[#F5F5F0]">
